@@ -1,0 +1,37 @@
+
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pymongo==4.9.0
+dnspython==2.7.0
+python-dotenv==1.0.1
+numpy==2.1.2
+pydantic==2.9.2
+python-multipart==0.0.12
+pypdf==5.1.0
+
+# Cloud LLM
+groq==0.11.0
+httpx==0.27.2
+
+# Vector DB
+chromadb==0.5.20
+
+# Semantic search (lightweight)
+scikit-learn==1.5.2
+sentence-transformers==3.2.1
+
+
+###### backend
+
+#1.## activate virtual environment -    .venv/scripts/activate  
+
+#2.#####  download requirements - pip install -r requirements.txt  
+
+#3.##### to run main.py - python -m src.main ##############
+
+
+#frontend
+
+###  cd C:\Users\ELCOT\Downloads\sorim-itsm\frontend
+###  npm install
+###  npm run dev

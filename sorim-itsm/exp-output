@@ -1,0 +1,221 @@
+Request 1 — Health Check
+Method: GET
+URL: http://localhost:8000/health
+Body: none
+
+
+Expected:
+
+json
+{
+  "status": "ok",
+  "llm_backend": "GroqLLM",
+  "embedder_backend": "NeuralEmbedder",
+  "vector_db": "chromadb",
+  "vector_count": 0,
+  "env": "development"
+}
+
+
+##
+
+Request 2 — Seed Knowledge Base
+Method: POST
+URL: http://localhost:8000/api/knowledge/seed
+Body: none
+
+Click Send.
+
+Expected:
+
+json
+{
+  "chunks_ingested": {
+    "documents_loaded": 1,
+    "total_chunks": 42,
+    "source": "ITSM_Helpdesk_Knowledge_Base.pdf",
+    "characters": 16853,
+    "vector_db": "chromadb",
+    "collection": "knowledge_base"
+  }
+}
+
+
+####3
+
+Request 3 — UC1: Analyze Ticket
+Method: POST
+URL: http://localhost:8000/api/tickets/analyze
+Headers:
+
+text
+Content-Type: application/json
+Body → raw → JSON:
+
+input:
+
+{
+  "user_input": "I cannot connect to VPN since this morning. Authentication keeps failing.",
+  "user_id": "emp_001"
+}
+
+
+Expected:
+
+json
+{
+  "servicenow_id": "INC4821039",
+  "user_id": "emp_001",
+  "raw_input": "I cannot connect to VPN since this morning. Authentication keeps failing.",
+  "intent": "Incident",
+  "category": "Network",
+  "sub_category": "VPN",
+  "priority": "P2",
+  "impact": "Individual",
+  "urgency": "High",
+  "assignment_group": "Network Support",
+  "summary": "VPN authentication failure",
+  "suggested_resolution": "VPN troubleshooting",
+  "auto_resolvable": true,
+  "auto_action": "vpn_troubleshoot",
+  "status": "New",
+  "created_at": "2026-10-11T..."
+}
+
+Request 4 — UC3: Ask Knowledge Base (RAG)
+Method: POST
+URL: http://localhost:8000/api/knowledge/ask
+Headers:
+
+text
+Content-Type: application/json
+Body → raw → JSON:
+
+input :
+
+{
+  "query": "How do I fix Outlook cache issues?"
+}
+
+Expected:
+
+
+{
+  "answer": "1. Close Outlook.\n2. Navigate to %localappdata%\\Microsoft\\Outlook...",
+  "sources": [
+    {"source": "ITSM_Helpdesk_Knowledge_Base.pdf", "score": 0.72},
+    {"source": "ITSM_Helpdesk_Knowledge_Base.pdf", "score": 0.65}
+  ]
+}
+
+Request 5 : Self-Service Chatbot
+Method: POST
+URL: http://localhost:8000/api/chat/
+Headers:
+
+text
+Content-Type: application/json
+Body → raw → JSON:
+
+input:
+
+{
+  "message": "My password has expired",
+  "user_id": "emp_001"
+}
+
+
+Expected:
+
+json
+{
+  "message": "✅ Password reset via AD API — new password emailed\n\nTicket INC4821039 auto-resolved.",
+  "status": "AUTO_RESOLVED",
+  "ticket": {
+    "servicenow_id": "INC4821039",
+    "category": "Identity",
+    "priority": "P2",
+    ...
+  },
+  "auto_resolution": {
+    "executed": true,
+    "action": "reset_password",
+    "result": "Password reset via AD API — new password emailed"
+  }
+}
+
+
+
+Request 6 — UC5: Software Provisioning
+Method: POST
+URL: http://localhost:8000/api/provisioning/request
+Headers:
+
+text
+Content-Type: application/json
+Body → raw → JSON:
+
+input :
+
+{
+  "request": "I need Adobe Photoshop for design work",
+  "user_id": "emp_001"
+}
+
+
+Expected:
+
+
+{
+  "user_id": "emp_001",
+  "request": "I need Adobe Photoshop for design work",
+  "software_name": "Adobe Photoshop",
+  "justification": "Design work",
+  "licensed": true,
+  "risk": "Medium",
+  "status": "PENDING_APPROVAL",
+  "next_step": "Awaiting manager approval"
+}
+
+
+
+Request 7 — List Tickets
+Method: GET
+URL: http://localhost:8000/api/tickets/
+Body: none
+
+Expected: Array of every ticket created so far.
+
+json
+[
+  {
+    "servicenow_id": "INC4821039",
+    "user_id": "emp_001",
+    "raw_input": "...",
+    "category": "Network",
+    ...
+  }
+]
+
+
+Request 8 — List Audit Logs
+Method: GET
+URL: http://localhost:8000/api/audit/
+Body: none
+
+Expected: Array of every self-heal action logged.
+
+json
+[
+  {
+    "action": "reset_password",
+    "result": "Password reset via AD API — new password emailed",
+    "ticket_id": "INC4821039",
+    "status": "success",
+    "timestamp": "2026-10-11T..."
+  }
+]
+
+
+
+
